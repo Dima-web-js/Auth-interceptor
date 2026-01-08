@@ -1,0 +1,21 @@
+@if (isLoading()) {
+  <div class="loading">Loading...</div>
+} @else if (error()) {
+  <div class="error">{{ error() }}</div>
+} @else if (user()) {
+  <div class="profile">
+    <h1>User Profile</h1>
+    <div class="user-info">
+      <img [src]="user()!.image" [alt]="user()!.username" class="avatar" />
+      <div class="details">
+        <p><strong>ID:</strong> {{ user()!.id }}</p>
+        <p><strong>Username:</strong> {{ user()!.username }}</p>
+        <p><strong>Email:</strong> {{ user()!.email }}</p>
+        <p><strong>Name:</strong> {{ user()!.firstName }} {{ user()!.lastName }}</p>
+        <p><strong>Gender:</strong> {{ user()!.gender }}</p>
+      </div>
+    </div>
+    <button (click)="logout()" class="logout-btn">Logout</button>
+  </div>
+}
+
