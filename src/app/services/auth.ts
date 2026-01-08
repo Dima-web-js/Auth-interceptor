@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 export interface LoginResponse {
   id: number;
@@ -26,6 +27,7 @@ interface LoginRequest {
 })
 export class Auth {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly accessTokenKey = 'accessToken';
   private readonly refreshTokenKey = 'refreshToken';
 
@@ -78,5 +80,6 @@ export class Auth {
 
   logout(): void {
     this.clearTokens();
+    this.router.navigate(['/login']);
   }
 }

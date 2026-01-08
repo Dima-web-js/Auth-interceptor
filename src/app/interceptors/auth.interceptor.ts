@@ -32,8 +32,27 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(clonedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Если получили 401 и это не запрос на обновление токена, пытаемся обновить
-      if (error.status === 401 && !isRefreshRequest && accessToken) {
+      // Если получили 401 и это не запрос на обновление токена
+      if (error.status === 401 && !isRefreshRequest) {
+
+        // Тут хотел при ошибке 401 проверять наличие токенов в localStorage и если нет, 
+        // то редиректить на логин, но почему-то меня всегда при обновлении страницы перекидывает на логин(
+
+
+
+        // const refreshToken = auth.getRefreshToken();
+        // const accessToken = auth.getAccessToken();
+
+        // // Если нет ни одного токена в localStorage - редирект на логин
+        // if (!accessToken && !refreshToken) {
+        //   auth.logout();
+        //   if (router.url !== '/login') {
+        //     router.navigate(['/login']);
+        //   }
+        //   return throwError(() => error);
+        // }
+
+        // Если есть refreshToken - пытаемся обновить
         return refreshAuthSession.refresh().pipe(
           switchMap(() => {
             // Повторяем запрос с новым токеном
@@ -49,9 +68,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             return throwError(() => error);
           }),
           catchError((refreshError) => {
-            // Если обновление не удалось, очищаем токены и редиректим на логин
-            auth.logout();
-            router.navigate(['/login']);
             return throwError(() => refreshError);
           })
         );

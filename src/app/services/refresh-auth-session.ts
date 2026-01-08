@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs';
+import { tap, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Auth } from './auth';
 
 export interface RefreshResponse {
@@ -22,15 +23,23 @@ export class RefreshAuthSession {
 
   refresh(expiresInMins: number = 30) {
     const refreshToken = this.auth.getRefreshToken();
-    const body: RefreshRequest = { expiresInMins };
     
-    if (refreshToken) {
-      body.refreshToken = refreshToken;
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
     }
+
+    const body: RefreshRequest = {
+      refreshToken,
+      expiresInMins,
+    };
 
     return this.http.post<RefreshResponse>('https://dummyjson.com/auth/refresh', body).pipe(
       tap((data) => {
         this.auth.setTokens(data.accessToken, data.refreshToken);
+      }),
+      catchError((error) => {
+        const message = error?.error?.message || error?.message || 'Refresh failed';
+        return throwError(() => new Error(message));
       })
     );
   }
